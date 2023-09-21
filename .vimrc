@@ -39,7 +39,6 @@ Plug 'ap/vim-css-color' " Preview de colores en CSS
 Plug 'ryanoasis/vim-devicons' " Iconos para Developer
 Plug 'preservim/tagbar' " Tagbar for code navigation
 Plug 'mg979/vim-visual-multi' " CTRL + N for multiple cursors
-"Plug 'phpactor/phpactor', {'for': 'php', 'tag': '*', 'do': 'composer install --no-dev -o'}
 
 " Debug
 Plug 'vim-vdebug/vdebug'
@@ -56,7 +55,11 @@ set background=dark
 " *********************
 " * Plugin easymotion *
 " *********************
-nmap <Leader>s <Plug>(easymotion-s2)
+nmap s <Plug>(easymotion-s2)  "Buscar 2 caracteres
+map / <Plug>(easymotion-sn)   "Buscar n caracteres
+omap / <Plug>(easymotion-tn)
+map n <Plug>(easymotion-next) "Mover al siguiente resultado
+map N <Plug>(easymotion-prev) "Mover al anterior resultado
 
 " *******************
 " * Plugin NerdTree *
@@ -69,8 +72,8 @@ nmap <Leader>nt :NERDTreeFind<CR>
 " **********************
 let g:airline#extensions#tabline#enabled = 1 "Habilitar barra de tabs superior
 let g:airline_powerline_fonts = 1
-nmap <C-Left> :bp<CR>
-nmap <C-Right> :bn<CR>
+nmap <C-Left> :bp<CR> "Desplaza al tab de la izquierda
+nmap <C-Right> :bn<CR> "Desplaza al tab de la derecha
 
 " *****************
 " * Plugin Vdebug *
@@ -116,11 +119,11 @@ endif
 " other plugin before putting this into your config.
 inoremap <silent><expr> <TAB>
       \ pumvisible() ? "\<C-n>" :
-      \ <SID>check_back_space() ? "\<TAB>" :
+      \ CheckBackspace() ? "\<TAB>" :
       \ coc#refresh()
 inoremap <expr><S-TAB> pumvisible() ? "\<C-p>" : "\<C-h>"
 
-function! s:check_back_space() abort
+function! CheckBackspace() abort
   let col = col('.') - 1
   return !col || getline('.')[col - 1]  =~# '\s'
 endfunction
@@ -149,15 +152,13 @@ nmap <silent> gi <Plug>(coc-implementation)
 nmap <silent> gr <Plug>(coc-references)
 
 " Use K to show documentation in preview window.
-nnoremap <silent> K :call <SID>show_documentation()<CR>
+nnoremap <silent> K :call ShowDocumentation()<CR>
 
-function! s:show_documentation()
-  if (index(['vim','help'], &filetype) >= 0)
-    execute 'h '.expand('<cword>')
-  elseif (coc#rpc#ready())
+function! ShowDocumentation()
+  if CocAction('hasProvider', 'hover')
     call CocActionAsync('doHover')
   else
-    execute '!' . &keywordprg . " " . expand('<cword>')
+    call feedkeys('K', 'in')
   endif
 endfunction
 
@@ -189,6 +190,9 @@ nmap <leader>ac  <Plug>(coc-codeaction)
 " Apply AutoFix to problem on the current line.
 nmap <leader>qf  <Plug>(coc-fix-current)
 
+" Run the Code Lens action on the current line.
+nmap <leader>cl  <Plug>(coc-codelens-action)
+
 " Map function and class text objects
 " NOTE: Requires 'textDocument.documentSymbol' support from the language server.
 xmap if <Plug>(coc-funcobj-i)
@@ -216,13 +220,13 @@ nmap <silent> <C-s> <Plug>(coc-range-select)
 xmap <silent> <C-s> <Plug>(coc-range-select)
 
 " Add `:Format` command to format current buffer.
-command! -nargs=0 Format :call CocAction('format')
+command! -nargs=0 Format :call CocActionAsync('format')
 
 " Add `:Fold` command to fold current buffer.
 command! -nargs=? Fold :call     CocAction('fold', <f-args>)
 
 " Add `:OR` command for organize imports of the current buffer.
-command! -nargs=0 OR   :call     CocAction('runCommand', 'editor.action.organizeImport')
+command! -nargs=0 OR   :call     CocActionAsync('runCommand', 'editor.action.organizeImport')
 
 " Add (Neo)Vim's native statusline support.
 " NOTE: Please see `:h coc-status` for integrations with external plugins that
